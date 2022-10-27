@@ -18,15 +18,6 @@ namespace CodeCraftersOTP
                 url: "{controller}/{action}/{id}",
                 defaults: new { controller = "Home", action = "Index", id = UrlParameter.Optional }
             );
-            
-            // routes.MapRoute(
-            //     name: "Otp",
-            //     url: "{controller}/{action}/{id}",
-            //     defaults: new { controller = "Otp", action = "Index", id = UrlParameter.Optional }
-            // );
-            
-
-
         }
     }
 }

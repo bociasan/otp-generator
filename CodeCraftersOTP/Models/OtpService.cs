@@ -40,9 +40,6 @@ namespace CodeCraftersOTP.Models
             
             if (otp != null)
             {
-                Console.WriteLine("First {0} {1} {2} {3}", otp.Id.ToString(), otp.UserId, otp.Key,
-                    otp.WasUsed.ToString());
-
                 if (otp.Key == validateData.Key)
                 {
                     if (!otp.WasUsed)
@@ -78,7 +75,7 @@ namespace CodeCraftersOTP.Models
             else
             {
                 status = "unknown";
-                return new { message = "You should retreive an OTP code first.", status};
+                return new { message = "You should retrieve an OTP code first.", status};
             }
         }
     }
