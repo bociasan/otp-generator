@@ -1,0 +1,143 @@
+﻿@{
+    ViewBag.Title = "Create OTP";
+}
+
+<div class="jumbotron">
+    @* <p id="time"></p> *@
+    <div >
+        <div style="display: inline-block;">
+            <div>
+                <p class="lead">Create OTP</p>
+                <p>
+                    <input type="text" id="userId" placeholder="User ID"/>
+                </p>
+                <p>
+                    <button onclick="onCreateHandler()"> Create </button>
+                    <span id="remaining" style="margin: 50px;"></span>
+                </p>
+            </div>
+
+            <div>
+                <p class="lead">Validate OTP</p>
+                <p>
+                    <input type="text" id="key" placeholder="OTP Key"/>
+                    <span id="keyStatus"></span>
+                    @* style="position: relative; width: 50px; height: 50px;" *@
+                </p>
+                <p>
+                    <button onclick="onValidateHandler()"> Validate </button>
+                </p>
+            </div>
+        </div>
+        <div class="messages" style="margin: 0 80px;display: inline-block; width: 500px; max-height: 250px; overflow: hidden;"/>
+    </div>
+</div>
+
+@section Scripts
+{
+    <script>
+    
+    function updateTime(){
+        document.getElementById('time').innerHTML = new Date().toLocaleString();
+        let remainingTime = document.getElementById('remaining').innerText
+        
+        if (remainingTime!==''){
+            try {
+              remainingTime = parseInt(remainingTime)
+              if (remainingTime > 0){
+                remainingTime--
+                document.getElementById('remaining').innerText = remainingTime    
+              } else {
+                document.getElementById('remaining').innerText = ''
+              }
+            } catch (err){}    
+        }
+        
+        setTimeout (updateTime, 1000);
+        }
+    updateTime()
+    
+      function onCreateHandler(){ 
+        const GENERATE_OTP_URL = '@System.Web.Configuration.WebConfigurationManager.AppSettings["GENERATE_OTP_URL"]';
+        let userId = document.getElementById("userId").value;
+        
+        if (userId !==''){
+            postData(GENERATE_OTP_URL, { userId, requestDateTime: new Date().toJSON()})
+               .then((data) => {
+                 console.log(data); 
+                 document.getElementById('remaining').innerText = '30';
+                 alert(`OTP ${data.Key} is valid for 30 seconds.`);
+               });    
+        } else {
+          alert('UserID shouldn\'t be empty.')      
+        }
+        
+    }
+            
+      function onValidateHandler(){
+        const VALIDATE_OTP_URL = '@System.Web.Configuration.WebConfigurationManager.AppSettings["VALIDATE_OTP_URL"]';
+        let userId = document.getElementById("userId").value;
+        let key = document.getElementById("key").value;
+        
+        if (userId.length > 0){
+            if (key.length > 0)
+            {
+                postData(VALIDATE_OTP_URL, { userId, key})
+                   .then((data) => {
+                       console.log(data)
+                       // document.getElementById("keyStatus").innerHTML = data.status
+                       var message = $(`<div class="alert alert-error error-message" style="position: relative;display: none;color: ${getColor(data.status)};top: 30%;width:300px;z-index: 9999;">`);
+                       var close = $('<button type="button" class="close" data-dismiss="alert">&times</button>');
+                       message.append(close);
+                       message.append(data.message);
+                       message.appendTo($('.messages')).fadeIn(300).delay(2000).fadeOut(500);
+                   })
+            } 
+            else
+            { 
+                alert('Enter OTP key.')  
+            }
+        } 
+        else 
+        {
+             alert('UserID shouldn\'t be empty.')     
+        }
+     }
+
+     async function postData(url = '', data = {}) {
+       const response = await fetch(url, {
+         method: 'POST',
+         mode: 'cors', // no-cors, *cors, same-origin
+         cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+         credentials: 'same-origin', // include, *same-origin, omit
+         headers: {
+           'Content-Type': 'application/json'
+         },
+         redirect: 'follow', // manual, *follow, error
+         referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
+         body: JSON.stringify(data) // body data type must match "Content-Type" header
+       });
+       return response.json(); // parses JSON response into native JavaScript objects
+     }
+     
+     function getColor(color){
+          switch (color){
+              case "valid":
+                   return "green"
+               case "unknown":
+                   return "red"
+               case "expired":
+                  return "purple"
+              case "invalid":
+                  return "red"
+              case "used":
+                  return "red"
+               default:
+                   return "black"
+
+          }
+     }
+          
+              
+    </script>
+}
