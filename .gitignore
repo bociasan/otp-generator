@@ -1,5 +1,7 @@
 .env
 *.env
+.config
+*.config
 
 *.com
 *.class

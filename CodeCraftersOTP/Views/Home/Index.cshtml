@@ -41,7 +41,6 @@ function updateTime() {
     if (remainingTime !== '') {
         try {
             remainingTime = parseInt(remainingTime.replace(/[A-Za-z: ]/g, ''))
-            console.log(remainingTime)
             if (remainingTime > 0) {
                 remainingTime--
                 document.getElementById('remaining').innerText = `Expires in: ${remainingTime}s`
@@ -85,10 +84,10 @@ function onValidateHandler() {
                 .then((data) => {
                     console.log(data)
                     // document.getElementById("keyStatus").innerHTML = data.status
-                    var message = $(`<div class="alert alert-error error-message" style="position: relative;display: none;color: ${getColor(data.status)};top: 30%;width:300px;z-index: 9999;">`);
+                    var message = $(`<div class="alert alert-error error-message" style="position: relative;display: none;color: ${getColor(data.Status)};top: 30%;width:300px;z-index: 9999;">`);
                     var close = $('<button type="button" class="close" data-dismiss="alert">&times</button>');
                     message.append(close);
-                    message.append(data.message);
+                    message.append(data.Message);
                     message.appendTo($('.messages')).fadeIn(300).delay(2000).fadeOut(500);
                     
                     if (data.status === 'valid'){

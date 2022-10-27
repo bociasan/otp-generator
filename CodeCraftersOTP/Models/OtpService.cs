@@ -28,9 +28,9 @@ namespace CodeCraftersOTP.Models
             _collection.InsertOne(otp);
             return otp;
         }
-        public Object ValidateOtpKey(OtpValidateData validateData)
+        public OtpResultData ValidateOtpKey(OtpValidateData validateData)
         {
-            String status = "";
+            String status, message;
             var otp = _collection.Find(_ => _.UserId == validateData.UserId)
                 .SortByDescending(e => e.ValidDateTime)
                 .FirstOrDefault();
@@ -42,36 +42,49 @@ namespace CodeCraftersOTP.Models
                     {
                         if (otp.ValidDateTime > DateTime.UtcNow)
                         {
+                            message = "Success.";
+                            status = "valid";
                             OtpResultData result = new OtpResultData(validateData.UserId, otp.WasUsed,
-                                !(otp.ValidDateTime > DateTime.UtcNow), otp.Key);
+                                !(otp.ValidDateTime > DateTime.UtcNow), otp.Key, message ,status);
                             var filter = Builders<OTP>.Filter.Eq("_id", otp.Id);
                             var update = Builders<OTP>.Update.Set("WasUsed", true);
                             _collection.UpdateOne(filter, update);
-                            status = "valid";
-                            return new { message = "Success.", result, status};
+                            return result;
                         }
                         else
                         {
                             status = "expired";
-                            return new { message = "This OTP code is expired.", status};
+                            message = "This OTP code is expired.";
+                            OtpResultData result = new OtpResultData(validateData.UserId, otp.WasUsed,
+                                !(otp.ValidDateTime > DateTime.UtcNow), validateData.Key, message ,status);
+                            return result;
                         }
                     }
                     else
                     {
                         status = "used";
-                        return new { message = "This OTP code was already used.", status};
+                        message = "This OTP code was already used.";
+                        OtpResultData result = new OtpResultData(validateData.UserId, otp.WasUsed,
+                            !(otp.ValidDateTime > DateTime.UtcNow), validateData.Key, message ,status);
+                        return result;
                     }
                 }
                 else
                 {
                     status = "invalid";
-                    return new { message = "OTP code is wrong.", status};
+                    message = "OTP code is wrong.";
+                    OtpResultData result = new OtpResultData(validateData.UserId, otp.WasUsed,
+                        !(otp.ValidDateTime > DateTime.UtcNow), validateData.Key, message ,status);
+                    return result;
                 }
             }
             else
             {
                 status = "unknown";
-                return new { message = "You should retrieve an OTP code first.", status};
+                message = "You should retrieve an OTP code first.";
+                OtpResultData result = new OtpResultData(validateData.UserId, null,
+                    null, validateData.Key, message ,status);
+                return result;
             }
         }
     }
@@ -79,6 +92,6 @@ namespace CodeCraftersOTP.Models
     public interface IOtpService
     {
         OTP GenerateOtpKey(OtpInputData inputData);
-        Object ValidateOtpKey(OtpValidateData validateData);
+        OtpResultData ValidateOtpKey(OtpValidateData validateData);
     }
 }
