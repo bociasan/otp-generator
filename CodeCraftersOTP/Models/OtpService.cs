@@ -10,14 +10,12 @@ namespace CodeCraftersOTP.Models
         private MongoClient _dbClient;
         private IMongoDatabase _database;
         private IMongoCollection<OTP> _collection;
-
         public OtpService()
         {
             _dbClient = new MongoClient(ConfigurationManager.ConnectionStrings["MongoDB"].ConnectionString);
             _database = _dbClient.GetDatabase("OTPGeneratorDB");
             _collection = _database.GetCollection<OTP>("OTPs");
         }
-
         public OTP GenerateOtpKey(OtpInputData inputData)
         {
             var key = new Random().Next(100000, 999999).ToString();
@@ -30,14 +28,12 @@ namespace CodeCraftersOTP.Models
             _collection.InsertOne(otp);
             return otp;
         }
-
         public Object ValidateOtpKey(OtpValidateData validateData)
         {
             String status = "";
             var otp = _collection.Find(_ => _.UserId == validateData.UserId)
                 .SortByDescending(e => e.ValidDateTime)
                 .FirstOrDefault();
-            
             if (otp != null)
             {
                 if (otp.Key == validateData.Key)
